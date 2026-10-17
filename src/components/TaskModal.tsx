@@ -27,7 +27,7 @@ export default function TaskModal({ task, onSave, onClose }: Props) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim()) return;
-    onSave({ category, content: content.trim(), targetDate, memo });
+    onSave({ category, content: content.trim(), targetDate, memo, failSubType: null });
   }
 
   return (

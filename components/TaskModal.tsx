@@ -79,7 +79,7 @@ export default function TaskModal({ initial, onSave, onClose }: Props) {
             <button
               onClick={() => {
                 if (!content.trim()) return alert('업무 내용을 입력하세요');
-                onSave({ category, content, targetDate, memo });
+                onSave({ category, content, targetDate, memo, failSubType: null });
               }}
               className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
             >

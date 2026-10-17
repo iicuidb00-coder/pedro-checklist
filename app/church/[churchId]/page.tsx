@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { CHURCHES, CATEGORIES } from '@/constants';
-import { ChurchId, Task, AchieveType, FailType } from '@/types';
+import { ChurchId, Task, AchieveType, FailType, FailSubType } from '@/types';
 import { getTasks, addTask, updateTask, deleteTask, recalcSummary } from '@/lib/firestore';
 import TaskModal from '@/components/TaskModal';
 import CheckModal from '@/components/CheckModal';
+
 
 function currentYM() {
   const now = new Date();
@@ -80,9 +81,9 @@ export default function ChurchPage() {
     load();
   };
 
-  const handleCheck = async (done: boolean, achieveType: AchieveType | null, failType: FailType | null, memo: string) => {
+  const handleCheck = async (done: boolean, achieveType: AchieveType | null, failType: FailType | null, failSubType: FailSubType | null, memo: string) => {
     if (!checkTask) return;
-    await updateTask(churchId as ChurchId, yearMonth, checkTask.id, { done, achieveType, failType, memo });
+    await updateTask(churchId as ChurchId, yearMonth, checkTask.id, { done, achieveType, failType, failSubType, memo });
     await recalcSummary(churchId as ChurchId, yearMonth);
     setCheckTask(null);
     load();

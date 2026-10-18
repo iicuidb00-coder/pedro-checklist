@@ -197,13 +197,13 @@ export default function DashboardPage() {
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                       <p className="text-xs text-gray-400 font-medium mb-1">최다 달성 전략</p>
                       <p className="text-xl font-bold text-green-600 truncate">
-                        {achieveChartData.sort((a, b) => b.value - a.value)[0]?.name || '-'}
+                        {[...achieveChartData].sort((a, b) => b.value - a.value)[0]?.name || '-'}
                       </p>
                     </div>
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                       <p className="text-xs text-gray-400 font-medium mb-1">주요 미달성 사유</p>
                       <p className="text-xl font-bold text-red-500 truncate">
-                        {failChartData.sort((a, b) => b.value - a.value)[0]?.name || '-'}
+                        {[...failChartData].sort((a, b) => b.value - a.value)[0]?.name || '-'}
                       </p>
                     </div>
                   </div>

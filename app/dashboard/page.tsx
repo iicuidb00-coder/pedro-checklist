@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
+import ChurchDetailModal from '@/components/ChurchDetailModal';
 import { CHURCHES, ACHIEVE_TYPES, FAIL_TYPES } from '@/constants';
 import { AchieveType, ChurchId, FailType, MonthSummary } from '@/types';
 import { getAllChurchSummaries, getYearSummaries } from '@/lib/firestore';
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [yearSummaries, setYearSummaries] = useState<MonthSummary[]>([]);
   const [selectedChurch, setSelectedChurch] = useState<ChurchId>('gwangju');
   const [loading, setLoading] = useState(false);
+  const [detailModal, setDetailModal] = useState<{churchId: ChurchId, churchName: string} | null>(null);
 
   const changeMonth = (delta: number) => {
     const [year, month] = yearMonth.split('-').map(Number);
@@ -272,11 +274,15 @@ export default function DashboardPage() {
                       const achieved = s?.achieved ?? 0;
                       const rate = total > 0 ? Math.round((achieved / total) * 100) : 0;
                       return (
-                        <div key={church.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-50 hover:shadow-md transition-shadow">
+                        <div 
+                          key={church.id} 
+                          onClick={() => setDetailModal({churchId: church.id, churchName: church.name})}
+                          className="bg-white rounded-xl p-4 shadow-sm border border-gray-50 hover:shadow-md transition-shadow cursor-pointer"
+                        >
                           <div className="flex items-center justify-between mb-3">
-                            <Link href={`/church/${church.id}`} className="font-bold text-gray-800 hover:text-blue-600 flex items-center gap-1">
-                              {church.name} <span className="text-[10px] text-gray-300 font-normal">→</span>
-                            </Link>
+                            <span className="font-bold text-gray-800 flex items-center gap-1">
+                              {church.name} <span className="text-[10px] text-gray-300 font-normal">→ 상세</span>
+                            </span>
                             <span className={`text-sm font-bold ${rate >= 80 ? 'text-green-500' : rate >= 50 ? 'text-blue-500' : 'text-orange-500'}`}>
                               {rate}%
                             </span>
@@ -306,6 +312,16 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+        )}
+
+        {/* Detail Modal */}
+        {detailModal && (
+          <ChurchDetailModal 
+            churchId={detailModal.churchId} 
+            churchName={detailModal.churchName}
+            yearMonth={yearMonth}
+            onClose={() => setDetailModal(null)}
+          />
         )}
 
         {/* Quarterly tab */}

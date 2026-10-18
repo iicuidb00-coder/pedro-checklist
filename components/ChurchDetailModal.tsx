@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Task, ChurchId } from '@/types';
 import { getTasks } from '@/lib/firestore';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
@@ -21,19 +21,27 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
     getTasks(churchId, yearMonth).then(setTasks).finally(() => setLoading(false));
   }, [churchId, yearMonth]);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: tasks.length,
     achieved: tasks.filter(t => t.done === true).length,
     failed: tasks.filter(t => t.done === false).length,
-  };
+  }), [tasks]);
 
-  const failData = Object.entries(
+  const failTypeData = useMemo(() => Object.entries(
     tasks.filter(t => t.done === false).reduce((acc, t) => {
       const type = t.failType || '기타';
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
-  ).map(([name, value]) => ({ name, value }));
+  ).map(([name, value]) => ({ name, value })), [tasks]);
+
+  const failSubTypeData = useMemo(() => Object.entries(
+    tasks.filter(t => t.done === false && t.failSubType).reduce((acc, t) => {
+      const type = t.failSubType!;
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  ).map(([name, value]) => ({ name, value })), [tasks]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -62,32 +70,55 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
             </div>
           </div>
 
-          {failData.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-sm font-bold text-gray-700 mb-4">미달성 사유 상세</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={failData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                      {failData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {failTypeData.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 text-center">미달성 원인 (대분류)</h3>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={failTypeData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
+                        {failTypeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            </div>
           )}
+            {failSubTypeData.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 text-center">미달성 사유 (세부)</h3>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={failSubTypeData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
+                        {failSubTypeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </PieChart>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div>
-            <h3 className="text-sm font-bold text-gray-700 mb-3">최근 과업 리스트</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-3">과업 상세 리스트</h3>
             <div className="space-y-2">
-              {tasks.slice(0, 5).map(task => (
-                <div key={task.id} className="p-3 bg-gray-50 rounded-lg text-sm flex justify-between">
-                  <span className="text-gray-700 truncate">{task.content}</span>
-                  <span className={`font-semibold ${task.done ? 'text-green-600' : 'text-red-500'}`}>
-                    {task.done ? '달성' : task.done === false ? '미달성' : '미체크'}
-                  </span>
+              {tasks.map(task => (
+                <div key={task.id} className="p-3 bg-gray-50 rounded-lg text-sm border border-gray-100">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-medium text-gray-800">{task.content}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${task.done ? 'bg-green-100 text-green-700' : task.done === false ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}`}>
+                      {task.done ? '달성' : task.done === false ? '미달성' : '미체크'}
+                    </span>
+                  </div>
+                  {task.done === false && (
+                    <p className="text-xs text-gray-500">
+                      원인: {task.failType || '-'} {task.failSubType ? ` > 상세: ${task.failSubType}` : ''}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

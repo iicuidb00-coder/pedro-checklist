@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { ACHIEVE_TYPES, FAIL_TYPES } from '@/constants';
-import { AchieveType, FailType, Task } from '@/types';
+import { AchieveType, FailType, FailSubType, Task } from '@/types';
 
 interface Props {
   task: Task;
-  onSave: (done: boolean, achieveType: AchieveType | null, failType: FailType | null, memo: string) => void;
+  onSave: (done: boolean, achieveType: AchieveType | null, failType: FailType | null, failSubType: FailSubType | null, memo: string) => void;
   onClose: () => void;
 }
 
@@ -13,6 +13,7 @@ export default function CheckModal({ task, onSave, onClose }: Props) {
   const [done, setDone] = useState<boolean | null>(task.done);
   const [achieveType, setAchieveType] = useState<AchieveType | null>(task.achieveType);
   const [failType, setFailType] = useState<FailType | null>(task.failType);
+  const [failSubType, setFailSubType] = useState<FailSubType | null>(task.failSubType);
   const [memo, setMemo] = useState(task.memo ?? '');
 
   return (
@@ -97,7 +98,7 @@ export default function CheckModal({ task, onSave, onClose }: Props) {
             <button
               onClick={() => {
                 if (done === null) return alert('달성 여부를 선택하세요');
-                onSave(done, achieveType, failType, memo);
+                onSave(done, achieveType, failType, failSubType, memo);
               }}
               className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
             >

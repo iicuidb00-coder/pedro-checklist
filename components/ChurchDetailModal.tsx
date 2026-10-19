@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Task, ChurchId } from '@/types';
 import { getTasks } from '@/lib/firestore';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface Props {
   churchId: ChurchId;
@@ -36,8 +36,8 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
   ).map(([name, value]) => ({ name, value })), [tasks]);
 
   const failSubTypeData = useMemo(() => Object.entries(
-    tasks.filter(t => t.done === false && t.failSubType).reduce((acc, t) => {
-      const type = t.failSubType!;
+    tasks.filter(t => t.done === false).reduce((acc, t) => {
+      const type = t.failSubType || '기타';
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
@@ -85,7 +85,7 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
                   </ResponsiveContainer>
                 </div>
               </div>
-          )}
+            )}
             {failSubTypeData.length > 0 && (
               <div>
                 <h3 className="text-sm font-bold text-gray-700 mb-4 text-center">미달성 사유 (세부)</h3>
@@ -94,7 +94,7 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
                     <PieChart>
                       <Pie data={failSubTypeData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
                         {failSubTypeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                      </PieChart>
+                      </Pie>
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
@@ -116,7 +116,7 @@ export default function ChurchDetailModal({ churchId, churchName, yearMonth, onC
                   </div>
                   {task.done === false && (
                     <p className="text-xs text-gray-500">
-                      원인: {task.failType || '-'} {task.failSubType ? ` > 상세: ${task.failSubType}` : ''}
+                      원인: {task.failType || '-'} <span className="mx-1">/</span> 상세: {task.failSubType || '-'}
                     </p>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ACHIEVE_TYPES, FAIL_TYPES } from '@/constants';
+import { ACHIEVE_TYPES, FAIL_TYPES, FAIL_SUB_TYPES } from '@/constants';
 import { AchieveType, FailType, FailSubType, Task } from '@/types';
 
 interface Props {
@@ -64,17 +64,36 @@ export default function CheckModal({ task, onSave, onClose }: Props) {
           {done === false && (
             <div className="mb-4">
               <p className="text-sm font-medium text-gray-700 mb-2">미달성 원인</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {FAIL_TYPES.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setFailType(t)}
-                    className={`py-2 px-3 rounded-lg text-sm transition-all ${
-                      failType === t ? 'bg-red-100 border-2 border-red-500 font-semibold' : 'bg-gray-50 border border-gray-200'
-                    }`}
-                  >
-                    {t}
-                  </button>
+                  <div key={t}>
+                    <button
+                      onClick={() => {
+                        setFailType(t);
+                        setFailSubType(null);
+                      }}
+                      className={`w-full text-left py-2 px-3 rounded-lg text-sm transition-all ${
+                        failType === t ? 'bg-red-100 border-2 border-red-500 font-semibold' : 'bg-gray-50 border border-gray-200'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                    {failType === t && (
+                      <div className="mt-2 grid grid-cols-2 gap-2 pl-4">
+                        {FAIL_SUB_TYPES[t].map((sub) => (
+                          <button
+                            key={sub}
+                            onClick={() => setFailSubType(sub as FailSubType)}
+                            className={`py-1.5 px-2 rounded-md text-xs transition-all ${
+                              failSubType === sub ? 'bg-red-200 border border-red-500 font-medium' : 'bg-white border border-gray-200'
+                            }`}
+                          >
+                            {sub}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
